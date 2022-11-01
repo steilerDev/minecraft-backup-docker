@@ -12,7 +12,7 @@ RUN apt-get update && \
         --no-install-recommends \
         --fix-missing \
         --assume-yes \
-            apt-utils vim curl dialog locales wget xxd lzma cron procps && \
+            apt-utils vim curl dialog locales wget xxd lzma cron procps ca-certificates && \
     apt-get clean autoclean && \
     apt-get autoremove && \
     rm -rf /var/lib/{apt,dpkg,cache,log} /tmp/* /var/tmp/* && \
