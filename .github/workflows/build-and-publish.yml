@@ -42,7 +42,6 @@ jobs:
             tar -C ./rootfs -czf ./rootfs.tar.gz ./
           fi
           docker build . --file Dockerfile --tag ${PKG_AUTHOR}/${PKG_NAME}:latest
-          docker save -o 
         else
           for d in */ ; do
             if [ -d ${d%/}/rootfs ]; then
