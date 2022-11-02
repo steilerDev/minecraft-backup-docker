@@ -6,41 +6,44 @@ The tool communicates with the minecraft server through RCON messages and can op
 The backup process itself has been designed to ensure data integrity. Unfortunately Mojang does not guarantee `auto save off` (See [MC-217729](https://bugs.mojang.com/browse/MC-217729)), however the tool will try and detect inconsistencies.
 
 # Configuration options
+In order to restore back to a previous backup, this docker container needs to be able to access the local docker daemon. For this, please expose the docker socket through a volume bind:
+ - `/var/run/docker.sock:/var/run/docker.sock`
+
 ## Environment Variables
 The following environmental variables can be used for configuration:
 
- - `MC_DOCKER`
-    The docker container name of the Minecraft server (used to start/stop the server during restoring)
+ - `MC_DOCKER`  
+    The docker container name of the Minecraft server (used to start/stop the server during restoring)  
     *required*
- - `RCON_PASSWORD`
-    The password to login to the RCON interface of the Minecraft server.
+ - `RCON_PASSWORD`  
+    The password to login to the RCON interface of the Minecraft server.  
     *required*
- - `RCON_HOST`
-    The hostname of the RCON interface of the Minecraft server.
+ - `RCON_HOST`  
+    The hostname of the RCON interface of the Minecraft server.  
     *required*
- - `RCON_PORT`
-    The port of the RCON interface of the Minecraft server.
+ - `RCON_PORT`  
+    The port of the RCON interface of the Minecraft server.  
     *default: 25575*
- - `RCON_PREFIX` 
-    The prefix used in RCON messages.
+ - `RCON_PREFIX`  
+    The prefix used in RCON messages.  
     *default: BOT*
- - Data retention policy:
-   - Specify the number of backups to be kept for this category. If the variable is not defined, all backups of the category are kept.
-   - `KEEP_HOURLY`
+ - Data retention policy:  
+   Specify the number of backups to be kept for this category. If the variable is not defined, all backups of the category are kept.
+   - `KEEP_HOURLY`  
       Number of last hourly backups to be retained
-   - `KEEP_DAILY`
+   - `KEEP_DAILY`  
       Number of last daily backups to be retained
-   - `KEEP_WEEKLY`
+   - `KEEP_WEEKLY`  
       Number of last weekly backups to be retained
-   - `KEEP_MONTHLY`
+   - `KEEP_MONTHLY`  
       Number of last monthly backups to be retained
-   - `KEEP_YEARLY`
+   - `KEEP_YEARLY`  
       Number of last yearly backups to be retained
- - `DEBUG`
+ - `DEBUG`  
     If not empty, increase logging output for debug purposes
     *default: unset*
- - `LOG_RCON`
-    If not empty, log messages to the RCON interface
+ - `LOG_RCON`  
+    Send log messages via RCON interface to the user specified in this variable. Not sending logs to RCON if this is empty.
     *default: unset*
 
 ## Volume Mounts
@@ -57,19 +60,41 @@ The following paths are recommended for persisting state and/or accessing config
 Usage with [`nginx-proxy`](https://github.com/nginx-proxy/nginx-proxy) and [`acme-companion`](https://github.com/nginx-proxy/acme-companion) inside of predefined `steilerGroup` network.
 
 ```
-version: '2'
+version: '3'
 services:
-  <service-name>:
-    image: steilerdev/<pkg-name>:latest
-    container_name: <docker-name>
+   minecraft:
+   image: itzg/minecraft-server:latest
+   container-name: minecraft
+   ports:
+      "25565:25565"
+   volumes:
+      - /opt/steilerGroup-Docker/minecraft/volumes/data:/data
+   environment:
+      <...>
+      RCON_PASSWORD: "someRCONPwd" 
+      <...>
     restart: unless-stopped
-    hostname: "<hostname>"
-    environment:
-      VAR: "value"
+  minecraft-backup:
+    image: steilerdev/minecraft-backup-docker:latest
+    container_name: minecraft-backup
     volumes:
-      - /<some-host-path>:/<some-docker-path>
+      - /opt/steilerGroup-Docker/minecraft/volumes/data/world:/world
+      - /opt/steilerGroup-Docker/minecraft/volumes/history:/history
+      - /opt/steilerGroup-Docker/minecraft/volumes/mc-backup-config:/config
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      CRON_SCHEDULE: "0 * * * *"
+      RCON_PASSWORD: "someRCONPwd"
+      RCON_HOST: "minecraft.steilerGroup"
+      LOG_RCON: "derduesterriese"
+      KEEP_HOURLY: "6"
+      KEEP_DAILY: "5"
+      KEEP_WEEKLY: "3"
+      MC_DOCKER: "minecraft"
+    depends_on:
+      - "minecraft" 
 networks:
   default:
-    external:
-      name: steilerGroup
+   name: steilerGroup
+   external:
 ```
