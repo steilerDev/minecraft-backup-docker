@@ -4,37 +4,21 @@ on: [push, pull_request]
 
 env:
   # This will pull the github repo name
-  PKG_NAME: ${{ github.event.repository.name }}
+  PKG_NAME: minecraft-backup
   PKG_AUTHOR: steilerdev
   ARTIFACT_FILE: docker-image-artifact.tar.gz
   ARTIFACT_NAME: docker-image
-#  NODE_VERSION: 17
 
 # Required secrets:
-# DOCKER_DEV_HOST       Self-hosted docker registry
-# DOCKER_DEV_USERNAME   Username for self-hosted docker registry
-# DOCKER_DEV_PWD        Password for self-hosted docker registry
-#
 # DOCKER_PWD            DockerHub password
 
 jobs:
   build:
     name: Build Project
-    if: github.repository != 'steilerDev/docker-base'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-#    - name: Setup node
-#      uses: actions/setup-node@v2
-#      with:
-#        node-version: ${{ env.NODE_VERSION }}
-#    - name: Install dependencies & build app
-#      run: |
-#        npm install && \
-#        npm run test && \
-#        npm run build && \
-#        npm run docs
     - name: Build docker images
       run: |
         if [ -f Dockerfile ]; then
@@ -57,27 +41,6 @@ jobs:
       with:
         name: ${{ env.ARTIFACT_NAME }}
         path: ./${{ env.ARTIFACT_FILE }}
-
-  publish-docker-dev:
-    name: Publish Project to steilerGroup-Docker
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - name: Download artifacts
-      uses: actions/download-artifact@v2
-    - name: Login to Docker Registry
-      run: docker login ${{secrets.DOCKER_DEV_HOST}} -u ${{secrets.DOCKER_DEV_USERNAME}} -p ${{secrets.DOCKER_DEV_PWD}}
-    - name: Load the build artifact
-      run: docker load -i ${ARTIFACT_NAME}/${ARTIFACT_FILE}
-    - name: Re-tag for push to private repo
-      run: |
-        docker images --filter=reference="${PKG_AUTHOR}/${PKG_NAME}:*" -q | while read IMAGE_ID; do 
-          SOURCE_TAG="$(docker image inspect --format='{{println (index .RepoTags 0)}}' $IMAGE_ID)"
-          docker tag $IMAGE_ID ${{secrets.DOCKER_DEV_HOST}}/$SOURCE_TAG
-          echo "Re-tagged $SOURCE_TAG with ID $IMAGE_ID to ${{secrets.DOCKER_DEV_HOST}}/$SOURCE_TAG"
-        done
-    - name: Push to private repo
-      run: docker image push --all-tags ${{secrets.DOCKER_DEV_HOST}}/$PKG_AUTHOR/$PKG_NAME
 
   publish-dockerhub:
     name: Publish Project to DockerHub

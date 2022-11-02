@@ -15,6 +15,8 @@ The following environmental variables can be used for configuration:
  - `MC_DOCKER`  
     The docker container name of the Minecraft server (used to start/stop the server during restoring)  
     *required*
+ - `CRON_SCHEDULE`  
+    The cron expression, defining the backup schedule. See [crontab.guru](https://crontab.guru) for help on defining this.
  - `RCON_PASSWORD`  
     The password to login to the RCON interface of the Minecraft server.  
     *required*
@@ -57,7 +59,7 @@ The following paths are recommended for persisting state and/or accessing config
     Directory holding the backup history
 
 # docker-compose example
-Usage with [`nginx-proxy`](https://github.com/nginx-proxy/nginx-proxy) and [`acme-companion`](https://github.com/nginx-proxy/acme-companion) inside of predefined `steilerGroup` network.
+Usage with [`itzg/minecraft-server`](https://github.com/itzg/docker-minecraft-server) inside a predefined `steilerGroup` network.
 
 ```
 version: '3'
@@ -96,5 +98,5 @@ services:
 networks:
   default:
    name: steilerGroup
-   external:
+   external: true
 ```
