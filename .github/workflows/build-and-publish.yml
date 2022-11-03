@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Build docker images
       run: |
         if [ -f Dockerfile ]; then
@@ -37,7 +37,7 @@ jobs:
     - name: Package docker artifact
       run: docker save ${PKG_AUTHOR}/${PKG_NAME} | gzip > ./$ARTIFACT_FILE
     - name: Upload docker artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.ARTIFACT_NAME }}
         path: ./${{ env.ARTIFACT_FILE }}
@@ -49,9 +49,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Download artifacts
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
     - name: Login to DockerHub
       run: docker login -u $PKG_AUTHOR -p ${{secrets.DOCKER_PWD}}
     - name: Load the build artifact
@@ -59,7 +59,7 @@ jobs:
     - name: Push to DockerHub
       run: docker image push --all-tags $PKG_AUTHOR/$PKG_NAME
     - name: Update DockerHub readme
-      uses: peter-evans/dockerhub-description@v2
+      uses: peter-evans/dockerhub-description@v3
       with:
         username: ${{ env.PKG_AUTHOR }}
         password: ${{ secrets.DOCKER_PWD }}

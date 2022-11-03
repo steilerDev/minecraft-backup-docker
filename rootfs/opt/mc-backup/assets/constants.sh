@@ -1,6 +1,6 @@
 # Constant for execution
 BIN_DIR="/opt/mc-backup"
-BACKUP_BIN="${BIN_DIR}/mc-backup.sh"
+BACKUP_BIN="${BIN_DIR}/backup.sh"
 ASSETS_FOLDER="${BIN_DIR}/assets"
 
 BACKUP_SOURCE="/world"

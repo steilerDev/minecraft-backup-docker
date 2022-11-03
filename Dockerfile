@@ -1,6 +1,8 @@
 FROM debian:bullseye-slim
 ENV DEBIAN_FRONTEND noninteractive
 ENV LANG en_US.utf8
+ENV LC_ALL en_US.utf8
+ENV LANGUAGE en_US.utf8
 
 # Applying fs patch for assets
 ADD rootfs.tar.gz /
@@ -29,8 +31,8 @@ WORKDIR /opt/mc-backup
 VOLUME ["/world", "/history", "/config"]
 
 RUN chmod +x /opt/mc-backup/* && \
-    ln -s /opt/mc-backup/status.sh /usr/local/bin/status && \
-    ln -s /opt/mc-backup/restore.sh /usr/local/bin/restore && \
-    ln -s /opt/mc-backup/backup.sh /usr/local/bin/backup
+    ln -s /opt/mc-backup/status.sh /usr/local/bin/mc-status && \
+    ln -s /opt/mc-backup/restore.sh /usr/local/bin/mc-restore && \
+    ln -s /opt/mc-backup/backup.sh /usr/local/bin/mc-backup
 
 ENTRYPOINT ["./entrypoint.sh"]

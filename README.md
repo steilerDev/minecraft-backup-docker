@@ -47,6 +47,8 @@ The following environmental variables can be used for configuration:
  - `LOG_RCON`  
     Send log messages via RCON interface to the user specified in this variable. Not sending logs to RCON if this is empty.
     *default: unset*
+ - `TZ`  
+    Set timezone of docker container, to make sure timestamps are correctly applied
 
 ## Volume Mounts
 The following paths are recommended for persisting state and/or accessing configurations
@@ -93,6 +95,7 @@ services:
       KEEP_DAILY: "5"
       KEEP_WEEKLY: "3"
       MC_DOCKER: "minecraft"
+      TZ: "Europe/Berlin"
     depends_on:
       - "minecraft" 
 networks:
